@@ -107,7 +107,7 @@ namespace Euphorically
                                 }
                                 break;
                             default:
-                                break;
+                                return;
                         }
                     }
                 }
