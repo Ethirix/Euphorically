@@ -18,6 +18,11 @@ namespace Euphorically.Config
             EuphoriaMinimumChance = settings.GetValue(ConfigName, "EuphoriaMinimumChance", 10);
             EuphoriaMaximumChance = settings.GetValue(ConfigName, "EuphoriaMaximumChance", 20);
             EuphoriaAntiSpamTime = settings.GetValue(ConfigName, "EuphoriaAntiSpamTime", 3f);
+            NormalEuphoriaInRandomize = settings.GetValue(ConfigName, "NormalEuphoriaInRandomize", true);
+            StiffFallEuphoriaInRandomize = settings.GetValue(ConfigName, "StiffFallEuphoriaInRandomize", true);
+            NarrowStumbleEuphoriaInRandomize = settings.GetValue(ConfigName, "NarrowStumbleEuphoriaInRandomize", true);
+            WideStumbleEuphoriaInRandomize = settings.GetValue(ConfigName, "WideStumbleEuphoriaInRandomize", true);
+            EuphoriaFromWeaponDamage = settings.GetValue(ConfigName, "EuphoriaFromWeaponDamage", true);
 
             if (EuphoriaMaximumChance < EuphoriaMinimumChance)
             {
@@ -40,5 +45,10 @@ namespace Euphorically.Config
         public readonly int EuphoriaMinimumChance;
         public readonly int EuphoriaMaximumChance;
         public readonly float EuphoriaAntiSpamTime;
+        public readonly bool NormalEuphoriaInRandomize;
+        public readonly bool StiffFallEuphoriaInRandomize;
+        public readonly bool NarrowStumbleEuphoriaInRandomize;
+        public readonly bool WideStumbleEuphoriaInRandomize;
+        public readonly bool EuphoriaFromWeaponDamage;
     }
 }
