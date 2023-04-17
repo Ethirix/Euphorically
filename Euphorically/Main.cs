@@ -37,6 +37,7 @@ namespace Euphorically
                     _timer = 0;
                 }
 
+                Function.Call(Hash.CLEAR_ENTITY_LAST_WEAPON_DAMAGE, Game.Player.Character);
                 return;
             }
 
@@ -46,6 +47,16 @@ namespace Euphorically
                     Function.Call<bool>(Hash.HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON, Game.Player.Character, 0, 1))
                 {
                     ThrowNotification("Caught Melee Damage?");
+                    Function.Call(Hash.CLEAR_ENTITY_LAST_WEAPON_DAMAGE, Game.Player.Character);
+                    return;
+                }
+
+                if (!_euphoriaConfig.EuphoriaFromWeaponDamage &&
+                    (Function.Call<bool>(Hash.HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON, Game.Player.Character, 0, 2) &&
+                     !Function.Call<bool>(Hash.HAS_ENTITY_BEEN_DAMAGED_BY_WEAPON, Game.Player.Character, 0, 1)))
+                {
+                    ThrowNotification("Caught Weapon Damage?");
+                    Function.Call(Hash.CLEAR_ENTITY_LAST_WEAPON_DAMAGE, Game.Player.Character);
                     return;
                 }
 
@@ -55,9 +66,51 @@ namespace Euphorically
 
                 ThrowNotification("Euphoria Time: " + euphoriaTime + "ms");
 
-                EuphoriaType euphoriaType = _euphoriaConfig.RandomizeEuphoriaTypes
-                    ? (EuphoriaType) _rng.Next(0, 4)
-                    : _euphoriaConfig.EuphoriaType;
+                EuphoriaType euphoriaType = _euphoriaConfig.EuphoriaType;
+
+                if ((_euphoriaConfig.NormalEuphoriaInRandomize || _euphoriaConfig.StiffFallEuphoriaInRandomize ||
+                     _euphoriaConfig.NarrowStumbleEuphoriaInRandomize ||
+                     _euphoriaConfig.WideStumbleEuphoriaInRandomize) && _euphoriaConfig.RandomizeEuphoriaTypes)
+                {
+                    bool foundValidEuphoriaType = false;
+                    while (!foundValidEuphoriaType)
+                    {
+                        EuphoriaType type = (EuphoriaType) _rng.Next(0, 4);
+                        switch (type)
+                        {
+                            case EuphoriaType.Normal:
+                                if (_euphoriaConfig.NormalEuphoriaInRandomize)
+                                {
+                                    foundValidEuphoriaType = true;
+                                    euphoriaType = type;
+                                }
+                                break;
+                            case EuphoriaType.StiffFall:
+                                if (_euphoriaConfig.StiffFallEuphoriaInRandomize)
+                                {
+                                    foundValidEuphoriaType = true;
+                                    euphoriaType = type;
+                                }
+                                break;
+                            case EuphoriaType.NarrowStumble:
+                                if (_euphoriaConfig.NarrowStumbleEuphoriaInRandomize)
+                                {
+                                    foundValidEuphoriaType = true;
+                                    euphoriaType = type;
+                                }
+                                break;
+                            case EuphoriaType.WideStumble:
+                                if (_euphoriaConfig.WideStumbleEuphoriaInRandomize)
+                                {
+                                    foundValidEuphoriaType = true;
+                                    euphoriaType = type;
+                                }
+                                break;
+                            default:
+                                return;
+                        }
+                    }
+                }
 
                 ThrowNotification("Euphoria Type: " + euphoriaType);
 
@@ -81,6 +134,8 @@ namespace Euphorically
 
         private static void RagdollWrapper(Ped ped, int timeInMilliseconds, EuphoriaType euphoriaType)
         {
+            Function.Call(Hash.SET_PED_CAN_RAGDOLL, ped, true);
+            
             Function.Call(Hash.SET_PED_TO_RAGDOLL, ped, timeInMilliseconds, timeInMilliseconds, (int) euphoriaType,
                 false, false, false);
         }
