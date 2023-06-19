@@ -50,6 +50,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EuphoriaType.cs" />
+    <Compile Include="Utilities\Timer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Euphorically.ini">

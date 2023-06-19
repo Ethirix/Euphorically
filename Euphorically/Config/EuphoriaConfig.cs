@@ -8,47 +8,13 @@ namespace Euphorically.Config
 
         public EuphoriaConfig(ScriptSettings settings)
         {
-            EuphoriaFromMeleeDamage = settings.GetValue(ConfigName, "EuphoriaFromMeleeDamage", true);
-            RandomizeEuphoriaTypes = settings.GetValue(ConfigName, "RandomizeEuphoriaTypes", true);
-            EuphoriaType = settings.GetValue(ConfigName, "EuphoriaType",  EuphoriaType.Normal);
-            RandomizeEuphoriaTimeRange = settings.GetValue(ConfigName, "RandomizeEuphoriaTimeRange", true);
-            EuphoriaMinimumTime = settings.GetValue(ConfigName, "EuphoriaMinimumTime", 2);
-            EuphoriaMaximumTime = settings.GetValue(ConfigName, "EuphoriaMaximumTime", 4);
-            RandomizeEuphoriaChance = settings.GetValue(ConfigName, "RandomizeEuphoriaChance", true);
-            EuphoriaMinimumChance = settings.GetValue(ConfigName, "EuphoriaMinimumChance", 10);
-            EuphoriaMaximumChance = settings.GetValue(ConfigName, "EuphoriaMaximumChance", 20);
-            EuphoriaAntiSpamTime = settings.GetValue(ConfigName, "EuphoriaAntiSpamTime", 3f);
-            NormalEuphoriaInRandomize = settings.GetValue(ConfigName, "NormalEuphoriaInRandomize", true);
-            StiffFallEuphoriaInRandomize = settings.GetValue(ConfigName, "StiffFallEuphoriaInRandomize", true);
-            NarrowStumbleEuphoriaInRandomize = settings.GetValue(ConfigName, "NarrowStumbleEuphoriaInRandomize", true);
-            WideStumbleEuphoriaInRandomize = settings.GetValue(ConfigName, "WideStumbleEuphoriaInRandomize", true);
-            EuphoriaFromWeaponDamage = settings.GetValue(ConfigName, "EuphoriaFromWeaponDamage", true);
-
-            if (EuphoriaMaximumChance < EuphoriaMinimumChance)
-            {
-                EuphoriaMaximumChance = EuphoriaMinimumChance;
-            }
-
-            if (EuphoriaMaximumTime < EuphoriaMinimumTime)
-            {
-                EuphoriaMaximumTime = EuphoriaMinimumTime;
-            }
+            BlockEuphoriaWithArmor = settings.GetValue(ConfigName, "BlockEuphoriaWithArmour", true);
+            EuphoriaChance = settings.GetValue(ConfigName, "EuphoriaChance", 10.0f);
+            EuphoriaCooldown = settings.GetValue(ConfigName, "EuphoriaCooldown", 5.0f);
         }
 
-        public readonly bool EuphoriaFromMeleeDamage;
-        public readonly bool RandomizeEuphoriaTypes;
-        public readonly EuphoriaType EuphoriaType;
-        public readonly bool RandomizeEuphoriaTimeRange;
-        public readonly int EuphoriaMinimumTime;
-        public readonly int EuphoriaMaximumTime;
-        public readonly bool RandomizeEuphoriaChance;
-        public readonly int EuphoriaMinimumChance;
-        public readonly int EuphoriaMaximumChance;
-        public readonly float EuphoriaAntiSpamTime;
-        public readonly bool NormalEuphoriaInRandomize;
-        public readonly bool StiffFallEuphoriaInRandomize;
-        public readonly bool NarrowStumbleEuphoriaInRandomize;
-        public readonly bool WideStumbleEuphoriaInRandomize;
-        public readonly bool EuphoriaFromWeaponDamage;
+        public readonly bool BlockEuphoriaWithArmor;
+        public readonly float EuphoriaChance;
+        public readonly float EuphoriaCooldown;
     }
 }
