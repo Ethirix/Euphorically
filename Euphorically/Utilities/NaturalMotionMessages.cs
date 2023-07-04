@@ -2,6 +2,9 @@
 {
     internal enum NaturalMotionMessages
     {
+        /// <summary>
+        /// Works
+        /// </summary>
         StopAllBehaviors = 0000,
         Start = 0002,
         ActivePose = 0003,
@@ -37,6 +40,9 @@
         Mask2 = 0038,
         HoldPose = 0039,
         Carried = 0040,
+        /// <summary>
+        /// Works?
+        /// </summary>
         ConfigureBalance = 0042,
         StepHeight = 0044,
         StepHeightInc4Step = 0045,
@@ -185,6 +191,9 @@
         LeanInDirection = 0195,
         LeanAmount1 = 0197,
         Dir1 = 0198,
+        /// <summary>
+        /// Works?
+        /// </summary>
         LeanRandom = 0199,
         LeanAmountMin1 = 0201,
         LeanAmountMax1 = 0202,
@@ -214,6 +223,9 @@
         Offset2 = 0232,
         InstanceIndex2 = 0233,
         BoundIndex2 = 0234,
+        /// <summary>
+        /// Works?
+        /// </summary>
         ForceLeanInDirection = 0235,
         LeanAmount7 = 0237,
         Dir3 = 0238,
@@ -261,6 +273,9 @@
         PassiveMode = 0289,
         BespokeBehaviour = 0290,
         Blend2ZeroPose = 0291,
+        /// <summary>
+        /// Works
+        /// </summary>
         StayUpright = 0292,
         UseForces = 0294,
         UseTorques1 = 0295,
@@ -337,6 +352,9 @@
         ConnectedLeftFoot = 0369,
         ConnectedRightFoot = 0370,
         AnimSource2 = 0371,
+        /// <summary>
+        /// Works
+        /// </summary>
         ArmsWindmill = 0372,
         LeftPartId = 0374,
         LeftRadius1 = 0375,
@@ -428,6 +446,9 @@
         ObjectBehindVictim = 0463,
         ObjectBehindVictimPos = 0464,
         ObjectBehindVictimNormal = 0465,
+        /// <summary>
+        ///Works
+        /// </summary>
         BodyBalance = 0466,
         Balance1 = 0467,
         ArmStiffness2 = 0468,
@@ -469,6 +490,9 @@
         Turn2TargetProb1 = 0504,
         AngVelMultiplier = 0505,
         AngVelThreshold2 = 0506,
+        /// <summary>
+        /// Works?
+        /// </summary>
         BodyFetal = 0507,
         Stiffness2 = 0509,
         DampingFactor = 0510,
@@ -486,6 +510,9 @@
         NoRollTimeBeforeSuccess = 0523,
         RollVelForSuccess = 0524,
         RollVelLinearContribution = 0525,
+        /// <summary>
+        /// Works
+        /// </summary>
         BodyWrithe = 0526,
         ArmStiffness3 = 0528,
         BackStiffness = 0529,
@@ -507,6 +534,9 @@
         BlendBack = 0545,
         BlendLegs = 0546,
         ApplyStiffness1 = 0547,
+        /// <summary>
+        /// Works
+        /// </summary>
         BraceForImpact = 0548,
         BraceDistance = 0550,
         TargetPredictionTime = 0551,
@@ -534,6 +564,9 @@
         NewBrace = 0573,
         Roll2Velocity = 0574,
         RollType = 0575,
+        /// <summary>
+        /// Works?
+        /// </summary>
         CatchFall1 = 0576,
         CatchFall2 = 0577,
         TorsoStiffness1 = 0578,
@@ -667,6 +700,9 @@
         KeepHeadAwayFromGround = 0712,
         ExtraTilt1 = 0713,
         TwistSpine1 = 0714,
+        /// <summary>
+        /// Works?
+        /// </summary>
         HighFall1 = 0715,
         HighFall2 = 0716,
         BodyStiffness6 = 0717,
@@ -737,6 +773,9 @@
         SideRoll = 0783,
         MaxVelForSideRoll = 0784,
         IncomingTransforms = 0785,
+        /// <summary>
+        /// Works?
+        /// </summary>
         InjuredOnGround = 0787,
         NumInjuries = 0789,
         Injury1Component = 0790,
@@ -764,6 +803,9 @@
         UseSpine3Thing = 0813,
         UseRollBoneCompensation = 0814,
         UseTwister = 0815,
+        /// <summary>
+        /// Works?
+        /// </summary>
         PedalLegs = 0816,
         PedalLeftLeg = 0818,
         PedalRightLeg = 0819,
@@ -886,6 +928,9 @@
         GunToHandD = 0938,
         GunToMuzzleInGun = 0939,
         GunToButtInGun = 0940,
+        /// <summary>
+        /// Works?
+        /// </summary>
         RollDownStairs = 0941,
         Stiffness7 = 0943,
         Damping9 = 0944,
@@ -1085,6 +1130,9 @@
         AllowLeftPistolRfw = 1148,
         AllowRightPistolRfw = 1149,
         RfwWithPistol = 1150,
+        /// <summary>
+        /// Works
+        /// </summary>
         StaggerFall = 1151,
         ArmStiffness8 = 1153,
         ArmDamping5 = 1154,
@@ -1153,6 +1201,9 @@
         WristMs = 1218,
         FeetMs = 1219,
         FallMask = 1220,
+        /// <summary>
+        /// Works?
+        /// </summary>
         Teeter1 = 1221,
         Teeter2 = 1222,
         EdgeLeft = 1223,
@@ -1180,6 +1231,9 @@
         UseHeadLook7 = 1246,
         TurnTowards = 1247,
         Pos6 = 1248,
+        /// <summary>
+        /// Works?
+        /// </summary>
         Yanked = 1249,
         ArmStiffness9 = 1251,
         ArmDamping6 = 1252,
