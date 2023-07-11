@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Euphorically.Config;
@@ -18,8 +19,6 @@ namespace Euphorically
         private readonly DebugConfig _debugConfig;
         private readonly Random _rnd = new Random();
 
-        private int _euphoriaBoneCounter = 0;
-
         private readonly Timer _euphoriaCooldownTimer;
 
         public Main()
@@ -31,7 +30,6 @@ namespace Euphorically
             Function.Call(Hash.CLEAR_ENTITY_LAST_WEAPON_DAMAGE, Game.Player.Character);
 
             Tick += OnTick;
-            KeyDown += OnKeyDown;
         }
 
         private void OnTick(object sender, EventArgs e)
@@ -70,48 +68,46 @@ namespace Euphorically
             
             Function.Call(Hash.SET_PED_TO_RAGDOLL, Game.Player.Character, euphoriaTime, euphoriaTime, 1, 1, 1, 0);
 
-            attackedPed.Euphoria.Shot.AllowInjuredArm = _euphoriaConfig.UseInjuredArm;
-            attackedPed.Euphoria.Shot.AllowInjuredLeg = _euphoriaConfig.UseInjuredLeg;
-            attackedPed.Euphoria.Shot.ReachForWound = _euphoriaConfig.UseReachForWound;
-            attackedPed.Euphoria.Shot.BodyStiffness = 11f;
-            attackedPed.Euphoria.Shot.ArmStiffness = 10f;
-            attackedPed.Euphoria.Shot.NeckStiffness = 14f;
-            attackedPed.Euphoria.Shot.CpainMag = 1f;
-            attackedPed.Euphoria.Shot.TimeBeforeReachForWound = _euphoriaConfig.DelayBeforeReachForWound;
+            InitializeShotConfig(in attackedPed);
+            
+            HandlePedBones(in attackedPed);
 
-            Bone bone;
-            using (OutputArgument output = new OutputArgument())
+            InitializeShotHeadLookConfig(attackedPed, attackingPed);
+
+            if (_euphoriaConfig.PointGunConfig.AimAtAttacker)
             {
-                Function.Call(Hash.GET_PED_LAST_DAMAGE_BONE, attackedPed, output);
-                bone = (Bone)output.GetResult<int>();
-            }
-
-            ThrowNotification($"Bone ID: {bone} ({(int)bone})");
-            attackedPed.Euphoria.ShotNewBullet.BodyPart = _euphoriaBoneCounter;
-            ThrowNotification($"Euphoria Bone: {_euphoriaBoneCounter}");
-            _euphoriaBoneCounter++;
-            if (_euphoriaBoneCounter > 21)
-                _euphoriaBoneCounter = 0;
-
-            if (_euphoriaConfig.LookAtAttacker)
-            {
-                attackedPed.Euphoria.ShotHeadLook.UseHeadLook = true;
-                attackedPed.Euphoria.ShotHeadLook.HeadLook = attackingPed.Position;
-                attackedPed.Euphoria.ShotHeadLook.Start();
-
-                //TODO: continue working on euphoria
-                //TODO: figure out what id each bone is in Euphoria IDs (0-21)
-            }
-
-            if (_euphoriaConfig.AimAtAttacker)
-            {
-                attackedPed.Euphoria.PointGun.UseTurnToTarget = _euphoriaConfig.TurnToAttacker;
+                attackedPed.Euphoria.PointGun.UseTurnToTarget = _euphoriaConfig.PointGunConfig.TurnToAttacker;
                 attackedPed.Euphoria.PointGun.RightHandTarget = attackingPed.Position;
                 ThrowNotification(
                     $"Attacking Ped Pos: {attackingPed.Position} - Offset: {new Vector3(attackedPed.Position.X - attackingPed.Position.X, attackedPed.Position.Y - attackingPed.Position.Y, attackedPed.Position.Z - attackingPed.Position.Z)}");
                 attackedPed.Euphoria.PointGun.Start();
             }
 
+            ApplyForceToRagdoll(in attackedPed, in attackingPed);
+            
+            attackedPed.Euphoria.Shot.Start();
+            attackedPed.Euphoria.ShotNewBullet.Start();
+            attackedPed.Euphoria.ShotSnap.Start();
+        }
+
+        private void HandlePedBones(in Ped ped)
+        {
+            Bone bone;
+            using (OutputArgument output = new OutputArgument())
+            {
+                Function.Call(Hash.GET_PED_LAST_DAMAGE_BONE, ped, output);
+                bone = (Bone)output.GetResult<int>();
+            }
+
+            EuphoriaBones? euphoriaBone = bone.ConvertToEuphoriaBone();
+            if (euphoriaBone != null)
+                ped.Euphoria.ShotNewBullet.BodyPart = (int)euphoriaBone;
+            else
+                ped.Euphoria.Shot.ReachForWound = false;
+        }
+
+        private void ApplyForceToRagdoll(in Ped attackedPed, in Ped attackingPed)
+        {
             Vector3 distanceNormalized = new Vector3(attackedPed.Position.X - attackingPed.Position.X,
                 attackedPed.Position.Y - attackingPed.Position.Y, attackedPed.Position.Z - attackingPed.Position.Z).Normalized;
 
@@ -123,9 +119,29 @@ namespace Euphorically
             }
 
             attackedPed.ApplyForce(distanceNormalized * force, Vector3.Zero, ForceType.MaxForceRot);
-            attackedPed.Euphoria.Shot.Start();
-            attackedPed.Euphoria.ShotNewBullet.Start();
-            attackedPed.Euphoria.ShotSnap.Start();
+        }
+
+        private void InitializeShotConfig(in Ped ped)
+        {
+            ped.Euphoria.Shot.AllowInjuredArm = _euphoriaConfig.ShotConfig.UseInjuredArm;
+            ped.Euphoria.Shot.AllowInjuredLeg = _euphoriaConfig.ShotConfig.UseInjuredLeg;
+            ped.Euphoria.Shot.AllowInjuredLowerLegReach = _euphoriaConfig.ShotConfig.UseLowerLegReach;
+            ped.Euphoria.Shot.ReachForWound = _euphoriaConfig.ShotConfig.UseReachForWound;
+            ped.Euphoria.Shot.BodyStiffness = _euphoriaConfig.ShotConfig.BodyStiffness;
+            ped.Euphoria.Shot.ArmStiffness = _euphoriaConfig.ShotConfig.ArmStiffness;
+            ped.Euphoria.Shot.NeckStiffness = _euphoriaConfig.ShotConfig.NeckStiffness;
+            ped.Euphoria.Shot.CpainMag = _euphoriaConfig.ShotConfig.SpineLeanMagnitude;
+            ped.Euphoria.Shot.TimeBeforeReachForWound = _euphoriaConfig.ShotConfig.DelayBeforeReachForWound;
+        }
+
+        private void InitializeShotHeadLookConfig(in Ped attackedPed, in Ped attackingPed)
+        {
+            if (_euphoriaConfig.ShotHeadLookConfig.LookAtAttacker)
+            {
+                attackedPed.Euphoria.ShotHeadLook.UseHeadLook = true;
+                attackedPed.Euphoria.ShotHeadLook.HeadLook = attackingPed.Position;
+                attackedPed.Euphoria.ShotHeadLook.Start();
+            }
         }
 
         private void ThrowNotification(string message)
@@ -134,34 +150,6 @@ namespace Euphorically
             {
                 Notification.Show(message);
             }
-        }
-
-        private void OnKeyDown(object sender, KeyEventArgs key)
-        {
-            if (key.KeyCode == Keys.Subtract)
-            {
-                Function.Call(Hash.SET_PED_TO_RAGDOLL, Game.Player.Character, 4000, 5000, 1, 1, 1, 0);
-                SendEuphoriaMessage(NaturalMotionMessages.StopAllBehaviors);
-                //SendEuphoriaMessage(NaturalMotionMessages.StaggerFall);
-                Game.Player.Character.Euphoria.StaggerFall.Start();
-                Game.Player.Character.Euphoria.ArmsWindmill.Start();
-            }
-            else if (key.KeyCode == Keys.Multiply)
-            {
-                Game.Player.Character.Euphoria.StaggerFall.Start();
-            }
-        }
-
-        private void SendEuphoriaMessage(NaturalMotionMessages message, bool runInstantly = true)
-        {
-            Function.Call(Hash.CREATE_NM_MESSAGE, runInstantly, (int)message);
-            Function.Call(Hash.GIVE_PED_NM_MESSAGE, Game.Player.Character);
-        }
-
-        private void SendEuphoriaMessage(Ped ped, NaturalMotionMessages message, bool runInstantly = true)
-        {
-            Function.Call(Hash.CREATE_NM_MESSAGE, runInstantly, (int)message);
-            Function.Call(Hash.GIVE_PED_NM_MESSAGE, ped);
         }
     }
 }

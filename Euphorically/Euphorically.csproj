@@ -49,10 +49,9 @@
     <Compile Include="Config\EuphoriaConfig.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EuphoriaType.cs" />
     <Compile Include="Utilities\EuphoriaBones.cs" />
     <Compile Include="Utilities\NaturalMotionMessages.cs" />
-    <Compile Include="Utilities\PlayerExtensions.cs" />
+    <Compile Include="Utilities\Extensions.cs" />
     <Compile Include="Utilities\Timer.cs" />
   </ItemGroup>
   <ItemGroup>
