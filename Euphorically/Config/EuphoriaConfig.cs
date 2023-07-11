@@ -16,6 +16,7 @@ namespace Euphorically.Config
             ShotConfig = new ShotConfig(settings);
             ShotHeadLookConfig = new ShotHeadLookConfig(settings);
             PointGunConfig = new PointGunConfig(settings);
+            ForceConfig = new ForceConfig(settings);
 
             BlockEuphoriaWithArmor = settings.GetValue(BaseConfigName, "BlockEuphoriaWithArmour", true);
             EuphoriaCooldown = settings.GetValue(BaseConfigName, "EuphoriaCooldown", 5.0f);

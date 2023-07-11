@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Euphorically.Config;
@@ -7,7 +6,6 @@ using Euphorically.Utilities;
 using GTA;
 using GTA.Math;
 using GTA.Native;
-using GTA.NaturalMotion;
 using GTA.UI;
 using Timer = Euphorically.Utilities.Timer;
 
@@ -30,13 +28,79 @@ namespace Euphorically
             Function.Call(Hash.CLEAR_ENTITY_LAST_WEAPON_DAMAGE, Game.Player.Character);
 
             Tick += OnTick;
+            KeyDown += OnKeyDown;
         }
+
+#if DEBUG
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Subtract:
+                    Function.Call(Hash.SET_PED_TO_RAGDOLL, Game.Player.Character, 10000, 10000, 1, 1, 1, 0);
+                    
+                    Game.Player.Character.Euphoria.ShotInGuts.ShotInGuts = true;
+                    Game.Player.Character.Euphoria.ShotNewBullet.BulletVel = Vector3.RelativeFront * 1000;
+                    Game.Player.Character.Euphoria.Shot.Start();
+                    Game.Player.Character.Euphoria.ShotNewBullet.Start();
+                    Game.Player.Character.Euphoria.ShotInGuts.Start();
+                    break;
+                default:
+                    break;
+            }
+        }
+#else
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            
+        }
+#endif
 
         private void OnTick(object sender, EventArgs e)
         {
             Player player = Game.Player;
             Ped character = player.Character;
+
+#if DEBUG
+            if (!_euphoriaCooldownTimer.Completed)
+            {
+                _euphoriaCooldownTimer.Update(Game.LastFrameTime);
+            }
+
+            Ped attackingPed = World.GetNearbyPeds(character, _debugConfig.PedSearchRadius,
+                Array.Empty<Model>()).FirstOrDefault(p => character.HasBeenDamagedBy(p));
+
+            if (attackingPed == null)
+                return;
+
+            if (!character.IsRagdoll && _euphoriaCooldownTimer.Completed && player.CanPlayerEuphoria(_euphoriaConfig))
+            {
+                RunEuphoriaLogic(character, attackingPed);
+                return;
+            }
+
+            InitializeShotConfig(in character);
+            HandlePedBones(in character);
+            InitializeShotHeadLookConfig(in character, in attackingPed);
+
+            if (_euphoriaConfig.PointGunConfig.AimAtAttacker)
+            {
+                character.Euphoria.PointGun.UseTurnToTarget = _euphoriaConfig.PointGunConfig.TurnToAttacker;
+                character.Euphoria.PointGun.RightHandTarget = attackingPed.Position;
+                ThrowNotification(
+                    $"Attacking Ped Pos: {attackingPed.Position} - Offset: {new Vector3(character.Position.X - attackingPed.Position.X, character.Position.Y - attackingPed.Position.Y, character.Position.Z - attackingPed.Position.Z)}");
+                character.Euphoria.PointGun.Start();
+            }
+
+            //ApplyForceToRagdoll(in character, in attackingPed);
             
+            character.Euphoria.Shot.Start();
+            character.Euphoria.ShotNewBullet.Start();
+            character.Euphoria.ShotSnap.Start();
+
+            character.ClearLastWeaponDamage();
+#else
+
             if (!_euphoriaCooldownTimer.Completed)
             {
                 _euphoriaCooldownTimer.Update(Game.LastFrameTime);
@@ -54,6 +118,7 @@ namespace Euphorically
                 RunEuphoriaLogic(character, attackingPed);
 
             character.ClearLastWeaponDamage();
+#endif
         }
 
         private void RunEuphoriaLogic(Ped attackedPed, Ped attackingPed)
@@ -111,14 +176,14 @@ namespace Euphorically
             Vector3 distanceNormalized = new Vector3(attackedPed.Position.X - attackingPed.Position.X,
                 attackedPed.Position.Y - attackingPed.Position.Y, attackedPed.Position.Z - attackingPed.Position.Z).Normalized;
 
-            float force = _euphoriaConfig.BaseEuphoriaForce;
-            if (_euphoriaConfig.UseRandomEuphoriaForce)
+            float force = _euphoriaConfig.ForceConfig.BaseEuphoriaForce;
+            if (_euphoriaConfig.ForceConfig.UseRandomEuphoriaForce)
             {
-                float deltaChance = _euphoriaConfig.MaximumEuphoriaForce - _euphoriaConfig.MinimumEuphoriaForce;
-                force = _euphoriaConfig.MinimumEuphoriaForce + deltaChance * (float)(_rnd.NextDouble() * 100d);
+                float deltaChance = _euphoriaConfig.ForceConfig.MaximumEuphoriaForce - _euphoriaConfig.ForceConfig.MinimumEuphoriaForce;
+                force = _euphoriaConfig.ForceConfig.MinimumEuphoriaForce + deltaChance * (float)(_rnd.NextDouble() * 100d);
             }
 
-            attackedPed.ApplyForce(distanceNormalized * force, Vector3.Zero, ForceType.MaxForceRot);
+            attackedPed.ApplyForce(distanceNormalized * force * Game.TimeScale, Vector3.Zero, ForceType.MaxForceRot);
         }
 
         private void InitializeShotConfig(in Ped ped)
