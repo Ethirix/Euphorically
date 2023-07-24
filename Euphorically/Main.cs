@@ -61,46 +61,6 @@ namespace Euphorically
             Player player = Game.Player;
             Ped character = player.Character;
 
-#if DEBUG
-            if (!_euphoriaCooldownTimer.Completed)
-            {
-                _euphoriaCooldownTimer.Update(Game.LastFrameTime);
-            }
-
-            Ped attackingPed = World.GetNearbyPeds(character, _debugConfig.PedSearchRadius,
-                Array.Empty<Model>()).FirstOrDefault(p => character.HasBeenDamagedBy(p));
-
-            if (attackingPed == null)
-                return;
-
-            if (!character.IsRagdoll && _euphoriaCooldownTimer.Completed && player.CanPlayerEuphoria(_euphoriaConfig))
-            {
-                RunEuphoriaLogic(character, attackingPed);
-                return;
-            }
-
-            InitializeShotConfig(in character);
-            HandlePedBones(in character);
-            InitializeShotHeadLookConfig(in character, in attackingPed);
-
-            if (_euphoriaConfig.PointGunConfig.AimAtAttacker)
-            {
-                character.Euphoria.PointGun.UseTurnToTarget = _euphoriaConfig.PointGunConfig.TurnToAttacker;
-                character.Euphoria.PointGun.RightHandTarget = attackingPed.Position;
-                ThrowNotification(
-                    $"Attacking Ped Pos: {attackingPed.Position} - Offset: {new Vector3(character.Position.X - attackingPed.Position.X, character.Position.Y - attackingPed.Position.Y, character.Position.Z - attackingPed.Position.Z)}");
-                character.Euphoria.PointGun.Start();
-            }
-
-            //ApplyForceToRagdoll(in character, in attackingPed);
-            
-            character.Euphoria.Shot.Start();
-            character.Euphoria.ShotNewBullet.Start();
-            character.Euphoria.ShotSnap.Start();
-
-            character.ClearLastWeaponDamage();
-#else
-
             if (!_euphoriaCooldownTimer.Completed)
             {
                 _euphoriaCooldownTimer.Update(Game.LastFrameTime);
@@ -118,7 +78,6 @@ namespace Euphorically
                 RunEuphoriaLogic(character, attackingPed);
 
             character.ClearLastWeaponDamage();
-#endif
         }
 
         private void RunEuphoriaLogic(Ped attackedPed, Ped attackingPed)
@@ -148,11 +107,16 @@ namespace Euphorically
                 attackedPed.Euphoria.PointGun.Start();
             }
 
+#if DEBUG
             ApplyForceToRagdoll(in attackedPed, in attackingPed);
-            
+#endif
+
             attackedPed.Euphoria.Shot.Start();
             attackedPed.Euphoria.ShotNewBullet.Start();
             attackedPed.Euphoria.ShotSnap.Start();
+#if DEBUG
+            attackedPed.Euphoria.ApplyBulletImpulse.Start();
+#endif
         }
 
         private void HandlePedBones(in Ped ped)
@@ -165,16 +129,24 @@ namespace Euphorically
             }
 
             EuphoriaBones? euphoriaBone = bone.ConvertToEuphoriaBone();
-            if (euphoriaBone != null)
+            if (euphoriaBone.HasValue)
                 ped.Euphoria.ShotNewBullet.BodyPart = (int)euphoriaBone;
             else
                 ped.Euphoria.Shot.ReachForWound = false;
         }
 
+#if DEBUG
         private void ApplyForceToRagdoll(in Ped attackedPed, in Ped attackingPed)
         {
             Vector3 distanceNormalized = new Vector3(attackedPed.Position.X - attackingPed.Position.X,
                 attackedPed.Position.Y - attackingPed.Position.Y, attackedPed.Position.Z - attackingPed.Position.Z).Normalized;
+
+            ThrowNotification(distanceNormalized.ToString());
+
+            attackedPed.Euphoria.ApplyBulletImpulse.HitPoint = attackedPed.LastWeaponImpactPosition;
+            attackedPed.Euphoria.ApplyBulletImpulse.Impulse = distanceNormalized;
+
+            return;
 
             float force = _euphoriaConfig.ForceConfig.BaseEuphoriaForce;
             if (_euphoriaConfig.ForceConfig.UseRandomEuphoriaForce)
@@ -185,6 +157,7 @@ namespace Euphorically
 
             attackedPed.ApplyForce(distanceNormalized * force * Game.TimeScale, Vector3.Zero, ForceType.MaxForceRot);
         }
+#endif
 
         private void InitializeShotConfig(in Ped ped)
         {
@@ -197,6 +170,8 @@ namespace Euphorically
             ped.Euphoria.Shot.NeckStiffness = _euphoriaConfig.ShotConfig.NeckStiffness;
             ped.Euphoria.Shot.CpainMag = _euphoriaConfig.ShotConfig.SpineLeanMagnitude;
             ped.Euphoria.Shot.TimeBeforeReachForWound = _euphoriaConfig.ShotConfig.DelayBeforeReachForWound;
+
+            
         }
 
         private void InitializeShotHeadLookConfig(in Ped attackedPed, in Ped attackingPed)
