@@ -39,11 +39,16 @@ namespace Euphorically
                 case Keys.Subtract:
                     Function.Call(Hash.SET_PED_TO_RAGDOLL, Game.Player.Character, 10000, 10000, 1, 1, 1, 0);
                     
-                    Game.Player.Character.Euphoria.ShotInGuts.ShotInGuts = true;
-                    Game.Player.Character.Euphoria.ShotNewBullet.BulletVel = Vector3.RelativeFront * 1000;
+                    InitializeShotConfig(Game.Player.Character);
+                    
+                    //500 for shotgun
+                    Game.Player.Character.Euphoria.ApplyBulletImpulse.Impulse = -Game.Player.Character.ForwardVector * 200;
+                    Game.Player.Character.Euphoria.ApplyBulletImpulse.HitPoint = Game.Player.Character.Position;
+                    
                     Game.Player.Character.Euphoria.Shot.Start();
                     Game.Player.Character.Euphoria.ShotNewBullet.Start();
-                    Game.Player.Character.Euphoria.ShotInGuts.Start();
+                    Game.Player.Character.Euphoria.ShotSnap.Start();
+                    Game.Player.Character.Euphoria.ApplyBulletImpulse.Start();
                     break;
                 default:
                     break;
@@ -143,8 +148,8 @@ namespace Euphorically
 
             ThrowNotification(distanceNormalized.ToString());
 
-            attackedPed.Euphoria.ApplyBulletImpulse.HitPoint = attackedPed.LastWeaponImpactPosition;
-            attackedPed.Euphoria.ApplyBulletImpulse.Impulse = distanceNormalized;
+            attackedPed.Euphoria.ApplyBulletImpulse.HitPoint = attackingPed.LastWeaponImpactPosition;
+            attackedPed.Euphoria.ApplyBulletImpulse.Impulse = distanceNormalized * 50;
 
             return;
 
