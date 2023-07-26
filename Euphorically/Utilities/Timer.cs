@@ -28,6 +28,11 @@
             Completed = false;
         }
 
+        public void ForceComplete()
+        {
+            Completed = true;
+        }
+
         public float Time { get; private set; }
         public bool Completed { get; private set; }
         public float CurrentTime { get; private set; }

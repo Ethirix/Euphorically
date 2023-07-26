@@ -19,7 +19,11 @@ namespace Euphorically.Config
             ForceConfig = new ForceConfig(settings);
 
             BlockEuphoriaWithArmor = settings.GetValue(BaseConfigName, "BlockEuphoriaWithArmour", true);
-            EuphoriaCooldown = settings.GetValue(BaseConfigName, "EuphoriaCooldown", 5.0f);
+
+            BaseEuphoriaCooldown = settings.GetValue(BaseConfigName, "BaseEuphoriaCooldown", 5.0f);
+            UseRandomEuphoriaCooldown = settings.GetValue(BaseConfigName, "UseRandomEuphoriaCooldown", true);
+            MinimumEuphoriaCooldownTime = settings.GetValue(BaseConfigName, "MinimumEuphoriaCooldownTime", 3.0f);
+            MaximumEuphoriaCooldownTime = settings.GetValue(BaseConfigName, "MaximumEuphoriaCooldownTime", 7.0f);
 
             BaseEuphoriaChance = settings.GetValue(BaseConfigName, "BaseEuphoriaChance", 10.0f);
             UseRandomEuphoriaChance = settings.GetValue(BaseConfigName, "UseRandomEuphoriaChance", true);
@@ -45,10 +49,19 @@ namespace Euphorically.Config
                 MinimumEuphoriaActiveTime = MaximumEuphoriaActiveTime;
             if (MaximumEuphoriaActiveTime < MinimumEuphoriaActiveTime)
                 MaximumEuphoriaActiveTime = MinimumEuphoriaActiveTime;
+
+            if (MinimumEuphoriaCooldownTime > MaximumEuphoriaCooldownTime)
+                MinimumEuphoriaCooldownTime = MaximumEuphoriaCooldownTime;
+            if (MaximumEuphoriaCooldownTime <  MinimumEuphoriaCooldownTime)
+                MaximumEuphoriaCooldownTime = MinimumEuphoriaCooldownTime;
         }
 
         public readonly bool BlockEuphoriaWithArmor;
-        public readonly float EuphoriaCooldown;
+
+        public readonly float BaseEuphoriaCooldown;
+        public readonly bool UseRandomEuphoriaCooldown;
+        public readonly float MinimumEuphoriaCooldownTime;
+        public readonly float MaximumEuphoriaCooldownTime;
 
         public readonly float BaseEuphoriaChance;
         public readonly bool UseRandomEuphoriaChance;
