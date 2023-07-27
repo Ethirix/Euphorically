@@ -1,7 +1,9 @@
 ﻿using System;
 using Euphorically.Config;
 using GTA;
+using GTA.Math;
 using GTA.Native;
+using GTA.UI;
 
 namespace Euphorically.Utilities
 {
@@ -21,11 +23,9 @@ namespace Euphorically.Utilities
                 return false;
 
             float deltaChance = euphoriaConfig.MaximumEuphoriaChance - euphoriaConfig.MinimumEuphoriaChance;
-            double value = deltaChance * (rnd.NextDouble() * 100d);
-            if (rnd.NextDouble() * 100d > value)
-                return false;
-
-            return true;
+            double value = euphoriaConfig.MinimumEuphoriaChance + deltaChance * rnd.NextDouble();
+            
+            return rnd.NextDouble() * 100d < value;
         }
 
         internal static EuphoriaBones? ConvertToEuphoriaBone(this Bone bone)
@@ -128,6 +128,15 @@ namespace Euphorically.Utilities
                 default:
                     return null;
             }
+        }
+
+        internal static Vector3 Abs(this Vector3 v)
+        {
+            v.X = Math.Abs(v.X);
+            v.Y = Math.Abs(v.Y);
+            v.Z = Math.Abs(v.Z);
+
+            return v;
         }
     }
 }

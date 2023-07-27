@@ -34,7 +34,7 @@
         }
 
         public float Time { get; private set; }
-        public bool Completed { get; private set; }
+        public bool Completed { get; private set; } = true;
         public float CurrentTime { get; private set; }
     }
 }

@@ -19,7 +19,12 @@ namespace Euphorically
 
         private readonly Timer _euphoriaCooldownTimer;
 
-        private bool _cancelledRagdoll = false;
+        private EuphoriaData _euphoriaData;
+
+        private bool _cancelledRagdoll = true;
+        private bool _cancelCheck = false;
+        private Vector3 _posLastFrame;
+        private float _frameTime;
 
         public Main()
         {
@@ -73,28 +78,51 @@ namespace Euphorically
 
             if (!_euphoriaCooldownTimer.Completed)
             {
-                if (character.IsStopped && !_cancelledRagdoll)
+                if (!_cancelCheck)
+                {
+                    Vector3 posDiff = _euphoriaData.AttackedPed.Position - _posLastFrame;
+                    posDiff.Abs();
+
+                    if (posDiff.X < 0.025f && posDiff.Y < 0.025f && posDiff.Z < 0.025f)
+                    {
+                        _frameTime += Game.LastFrameTime * Game.TimeScale;
+                    }
+                    else
+                    {
+                        _frameTime = 0;
+                    }
+
+                    if (_frameTime > 1.0f)
+                    {
+                        _cancelledRagdoll = false;
+                        _cancelCheck = true;
+                    }
+                }
+
+                if (character.IsRagdoll && !_cancelledRagdoll)
                 {
                     character.CancelRagdoll();
+                    
                     _cancelledRagdoll = true;
                     ThrowNotification($"Cancelled Ragdoll - {Game.GameTime}");
                 }
 
-                _euphoriaCooldownTimer.Update(Game.LastFrameTime);
+                _euphoriaCooldownTimer.Update(Game.LastFrameTime * Game.TimeScale);
+                _posLastFrame = character.Position;
                 character.ClearLastWeaponDamage();
                 return;
             }
-            _cancelledRagdoll = false;
-
-            if (!player.CanPlayerEuphoria(_euphoriaConfig))
-                return;
+            _cancelledRagdoll = true;
+            _cancelCheck = false;
+            _frameTime = 0;
 
             Ped attackingPed = World.GetNearbyPeds(character, _debugConfig.PedSearchRadius,
                 Array.Empty<Model>()).FirstOrDefault(p => character.HasBeenDamagedBy(p));
 
-            if (attackingPed != null)
+            if (attackingPed != null && player.CanPlayerEuphoria(_euphoriaConfig))
                 RunEuphoriaLogic(character, attackingPed);
 
+            _posLastFrame = character.Position;
             character.ClearLastWeaponDamage();
         }
 
@@ -105,8 +133,10 @@ namespace Euphorically
                 : _euphoriaConfig.BaseEuphoriaActiveTime;
 
             float euphoriaCooldown = _euphoriaConfig.UseRandomEuphoriaCooldown
-                ? _euphoriaConfig.MinimumEuphoriaChance + (float)_rnd.NextDouble() * (_euphoriaConfig.MaximumEuphoriaCooldownTime - _euphoriaConfig.MinimumEuphoriaCooldownTime)
+                ? _euphoriaConfig.MinimumEuphoriaCooldownTime + (float)_rnd.NextDouble() * (_euphoriaConfig.MaximumEuphoriaCooldownTime - _euphoriaConfig.MinimumEuphoriaCooldownTime)
                 : _euphoriaConfig.BaseEuphoriaCooldown;
+
+            _euphoriaData = new EuphoriaData(attackedPed, attackingPed, euphoriaTime, euphoriaCooldown);
 
             ThrowNotification($"Timer Started: {euphoriaCooldown + euphoriaTime}");
             _euphoriaCooldownTimer.Restart(euphoriaCooldown + euphoriaTime);
@@ -154,7 +184,7 @@ namespace Euphorically
             ThrowNotification(distanceNormalized.ToString());
 
             attackedPed.Euphoria.ApplyBulletImpulse.HitPoint = attackingPed.LastWeaponImpactPosition;
-            attackedPed.Euphoria.ApplyBulletImpulse.Impulse = distanceNormalized * 100;
+            attackedPed.Euphoria.ApplyBulletImpulse.Impulse = distanceNormalized * 50;
         }
 
         private void InitializePointGunConfig(in Ped attackedPed, Ped attackingPed)
