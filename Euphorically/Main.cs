@@ -19,8 +19,6 @@ namespace Euphorically
 
         private readonly Timer _euphoriaCooldownTimer;
 
-        private EuphoriaData _euphoriaData;
-
         private bool _cancelledRagdoll = true;
         private bool _cancelCheck = false;
         private Vector3 _posLastFrame;
@@ -80,7 +78,7 @@ namespace Euphorically
             {
                 if (!_cancelCheck)
                 {
-                    Vector3 posDiff = _euphoriaData.AttackedPed.Position - _posLastFrame;
+                    Vector3 posDiff = character.Position - _posLastFrame;
                     posDiff.Abs();
 
                     if (posDiff.X < 0.025f && posDiff.Y < 0.025f && posDiff.Z < 0.025f)
@@ -135,8 +133,6 @@ namespace Euphorically
             float euphoriaCooldown = _euphoriaConfig.UseRandomEuphoriaCooldown
                 ? _euphoriaConfig.MinimumEuphoriaCooldownTime + (float)_rnd.NextDouble() * (_euphoriaConfig.MaximumEuphoriaCooldownTime - _euphoriaConfig.MinimumEuphoriaCooldownTime)
                 : _euphoriaConfig.BaseEuphoriaCooldown;
-
-            _euphoriaData = new EuphoriaData(attackedPed, attackingPed, euphoriaTime, euphoriaCooldown);
 
             ThrowNotification($"Timer Started: {euphoriaCooldown + euphoriaTime}");
             _euphoriaCooldownTimer.Restart(euphoriaCooldown + euphoriaTime);
